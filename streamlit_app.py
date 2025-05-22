@@ -34,11 +34,28 @@ def chunk_dataframe(df, chunk_size=1000):
 
 # --- Embed chunks with OpenAI ---
 def embed_texts(texts):
-    response = openai.embeddings.create(
-        model="text-embedding-ada-002",
-        input=texts
-    )
-    return [e.embedding for e in response.data]
+    # Ensure all texts are non-empty strings
+    cleaned_texts = [t for t in texts if isinstance(t, str) and t.strip()]
+    
+    # Chunk into batches of up to 100 items (OpenAI recommends <= 2048 tokens total)
+    batch_size = 100
+    embeddings = []
+
+    for i in range(0, len(cleaned_texts), batch_size):
+        batch = cleaned_texts[i:i + batch_size]
+        try:
+            response = openai.embeddings.create(
+                model="text-embedding-ada-002",
+                input=batch
+            )
+            # Extract embedding vectors
+            batch_embeddings = [d["embedding"] for d in response["data"]]
+            embeddings.extend(batch_embeddings)
+        except openai.BadRequestError as e:
+            st.error("❌ OpenAI BadRequestError while embedding batch.")
+            st.stop()
+
+    return embeddings
 
 # --- Store embeddings with FAISS ---
 def build_vector_store(embeddings):
