@@ -71,7 +71,7 @@ Now, based on this data, answer the following question:
 
 # --- Streamlit Interface ---
 st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
-st.title("💬 omniSense Chatbot")
+st.title("💬 omniSense Chat")
 
 # Session state for chat history
 if "chat_history" not in st.session_state:
