@@ -81,7 +81,7 @@ if "chat_history" not in st.session_state:
 uploaded_file = st.file_uploader("📎 Upload your CSV data", type="csv")
 if uploaded_file:
     df = load_data(uploaded_file)
-    st.bar_chart(df, x="Category", y="Amount")
+    #st.bar_chart(df, x="Category", y="Amount")
     context = format_data_context(df)
     table_structure = """
 Table Name: VerizonData
