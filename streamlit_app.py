@@ -5,7 +5,7 @@ import time
 
 #---Set the page title---
 st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
-st.title("💬 omniSense Chat")
+st.title("💬 omniSense ChatBot")
 
 
 # --- API Key Input ---
