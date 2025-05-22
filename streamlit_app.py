@@ -3,7 +3,7 @@ import pandas as pd
 import openai
 
 # Replace with your actual OpenAI API key
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_key ="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" #st.secrets["OPENAI_API_KEY"]
 
 # --- Load CSV ---
 @st.cache_data
