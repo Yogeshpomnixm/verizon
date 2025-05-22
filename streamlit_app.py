@@ -107,6 +107,9 @@ if "chat_history" not in st.session_state:
 uploaded_file = st.file_uploader("📎 Upload your CSV data", type="csv")
 if uploaded_file:
     df = load_data(uploaded_file)
+    # 🔧 Ensure Month column is datetime
+    if 'Month' in df.columns:
+        df['Month'] = pd.to_datetime(df['Month'], errors='coerce')
     context = format_data_context(df)
 
     table_structure = """
