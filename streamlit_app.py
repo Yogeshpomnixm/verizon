@@ -124,11 +124,14 @@ Columns:
         st.markdown(f"**omniSense:** {entry['answer']}")
 
     # Chat input
-    with st.form("chat_form", clear_on_submit=True):
-        user_question = st.chat_input("Ask anything") #st.text_input("Ask a question about your data:", key="user_input")
-        submitted = st.form_submit_button("Submit")
-
-    if submitted and user_question.strip():
+    #with st.form("chat_form", clear_on_submit=True):
+        #user_question = st.chat_input("Ask anything") #st.text_input("Ask a question about your data:", key="user_input")
+        #submitted = st.form_submit_button("Submit")
+   
+    #if submitted and user_question.strip():
+    # Chat input (at bottom)
+    user_question = st.chat_input("Ask anything...")
+    if user_question:
         try:
             question_type = classify_question_type(user_question)
         except Exception as e:
