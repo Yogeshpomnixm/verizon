@@ -133,9 +133,10 @@ Columns:
     # Chat input (at bottom)
     user_question = st.chat_input("Ask anything...")
     if user_question:
-      with st.spinner("Thinking..."):
-        time.sleep(2)  # Simulate a delay
         st.write("You asked:", user_question)
+      with st.spinner():
+        time.sleep(2)  # Simulate a delay
+        
         try:
             question_type = classify_question_type(user_question)
         except Exception as e:
