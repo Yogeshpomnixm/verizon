@@ -69,22 +69,6 @@ Now, based on this data, answer the following question:
     )
     return response.choices[0].message.content.strip()
 
-# --- Smart response ---
-def ask_smartansweropenai(question, reuslt):
-    prompt = f"""
-You are a data analysis assistant. Here is the reuslt and question:
-
-{question}
-
-Now, based on this data, give the result in smart english language:
-{reuslt}
-"""
-    response = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return response.choices[0].message.content.strip()
-
 # --- Streamlit Interface ---
 st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
 st.title("💬 omniSense Chatbot")
@@ -127,13 +111,13 @@ Columns:
                 python_expr = ask_gpt_for_python_expression(user_question, table_structure)
                 result = eval(python_expr, {"df": df, "pd": pd})
                 response = str(result)
-                response = ask_smartansweropenai(user_question,response)
+               
             except Exception as e:
                 response = f"❌ Error evaluating expression: {e}"
         else:
             try:
                 response = ask_openai(user_question, context)
-                response = ask_smartansweropenai(user_question,response)
+                
             except Exception as e:
                 response = f"❌ Error generating response: {e}"
 
