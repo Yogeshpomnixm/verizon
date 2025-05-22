@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import openai
+import time
 
 #---Set the page title---
 st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
