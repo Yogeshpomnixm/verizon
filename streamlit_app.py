@@ -2,17 +2,25 @@ import streamlit as st
 import pandas as pd
 import openai
 
-# Let the user input their OpenAI API key
-user_api_key = st.text_input("Enter your OpenAI API key:", type="password")
-# Replace with your actual OpenAI API key
-openai.api_key =user_api_key #st.secrets["OPENAI_API_KEY"]
+st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
+st.title("💬 omniSense Chatbot")
+
+# --- API Key Input ---
+user_api_key = st.text_input("🔑 Enter your OpenAI API Key:", type="password")
+
+if not user_api_key:
+    st.warning("⚠️ Please enter your OpenAI API key to continue.")
+    st.stop()
+
+# Set the API key
+openai.api_key = user_api_key
 
 # --- Load CSV ---
 @st.cache_data
-def load_data(file_path):
-    return pd.read_csv(file_path)
+def load_data(file):
+    return pd.read_csv(file)
 
-# --- Prepare data context ---
+# --- Format Data Context ---
 def format_data_context(df):
     context = ""
     sample = df.head(5).fillna("N/A")
@@ -20,7 +28,7 @@ def format_data_context(df):
         context += "\n" + "\n".join([f"{col}: {row[col]}" for col in df.columns]) + "\n"
     return context
 
-# --- Classify question ---
+# --- Classify Question ---
 def classify_question_type(question):
     prompt = f"""
 You are a smart assistant that classifies questions as either 'Quantitative' or 'Qualitative'.
@@ -37,7 +45,7 @@ Answer with only one word: Quantitative or Qualitative.
     )
     return response.choices[0].message.content.strip()
 
-# --- Generate Python expression ---
+# --- Generate Python Expression ---
 def ask_gpt_for_python_expression(question, table_structure):
     prompt = f"""
 You are a Python data analyst assistant. Based on the table structure below, and the DataFrame called `df`:
@@ -55,7 +63,7 @@ Only return the expression (e.g., df['Amount'].sum()).
     )
     return response.choices[0].message.content.strip()
 
-# --- Qualitative response ---
+# --- Qualitative Answer Generator ---
 def ask_openai(question, context):
     prompt = f"""
 You are a data analysis assistant. Here is the data context:
@@ -71,20 +79,33 @@ Now, based on this data, answer the following question:
     )
     return response.choices[0].message.content.strip()
 
-# --- Streamlit Interface ---
-st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
-st.title("💬 omniSense Chatbot")
+# --- Smart response Generator ---
+def ask_SmartResponse(user_question, result):
+    polish_prompt = f"""
+        The user asked: "{user_question}"
+        The answer is: {result}
 
-# Session state for chat history
+        Please respond in a natural and intelligent tone, like a data assistant, using complete English sentences.
+        """
+
+    polished_response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": polish_prompt}]
+        )
+
+    return polished_response.choices[0].message.content.strip()
+    
+
+# --- Session state for chat history ---
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# Upload CSV
+# --- Upload CSV ---
 uploaded_file = st.file_uploader("📎 Upload your CSV data", type="csv")
 if uploaded_file:
     df = load_data(uploaded_file)
-    #st.bar_chart(df, x="Category", y="Amount")
     context = format_data_context(df)
+
     table_structure = """
 Table Name: VerizonData
 
@@ -95,41 +116,45 @@ Columns:
 - Amount (numeric)
 """
 
-    # Show chat history
+    # Show previous chat history
     for entry in st.session_state.chat_history:
         st.markdown(f"**You:** {entry['question']}")
         st.markdown(f"**omniSense:** {entry['answer']}")
 
-    # User input
+    # Chat input
     with st.form("chat_form", clear_on_submit=True):
-        user_question = st.text_input("Ask a question about your data:", key="user_input") #st.text_area("Ask a question about your data:", height=100)
+        user_question = st.text_input("Ask a question about your data:", key="user_input")
         submitted = st.form_submit_button("Submit")
 
     if submitted and user_question.strip():
-        question_type = classify_question_type(user_question)
+        try:
+            question_type = classify_question_type(user_question)
+        except Exception as e:
+            st.error(f"❌ Error classifying question: {e}")
+            st.stop()
 
         if question_type.lower() == "quantitative":
             try:
                 python_expr = ask_gpt_for_python_expression(user_question, table_structure)
                 result = eval(python_expr, {"df": df, "pd": pd})
-                response = str(result)
-               
+                #response = str(result)
+                response=ask_SmartResponse(user_question,result)
             except Exception as e:
                 response = f"❌ Error evaluating expression: {e}"
         else:
             try:
                 response = ask_openai(user_question, context)
-                
+                response=ask_SmartResponse(user_question,response)
             except Exception as e:
                 response = f"❌ Error generating response: {e}"
 
-        # Append to chat history
+        # Store in chat history
         st.session_state.chat_history.append({
             "question": user_question,
             "answer": response
         })
 
-        # Rerun to show updated chat
+        # Refresh UI
         st.rerun()
 else:
     st.info("📥 Please upload a CSV file to begin.")
