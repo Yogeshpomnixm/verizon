@@ -2,8 +2,10 @@ import streamlit as st
 import pandas as pd
 import openai
 
+# Let the user input their OpenAI API key
+user_api_key = st.text_input("Enter your OpenAI API key:", type="password")
 # Replace with your actual OpenAI API key
-openai.api_key =st.secrets["OPENAI_API_KEY"]
+openai.api_key =user_api_key #st.secrets["OPENAI_API_KEY"]
 
 # --- Load CSV ---
 @st.cache_data
