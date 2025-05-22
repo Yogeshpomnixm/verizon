@@ -35,8 +35,8 @@ def classify_question_type(question):
     prompt = f"""
 You are a smart assistant that classifies questions as either 'Quantitative' or 'Qualitative'.
 
-A quantitative question asks for total numbers, counts, averages, percentages, year, month etc.
-A qualitative question asks for reasons, descriptions, categories, sales, amount, unit, or opinions.
+A quantitative question asks for total, numbers, counts, averages, percentages, sum etc.
+A qualitative question asks for reasons, descriptions, categories, sales, amount, unit, month or opinions.
 
 Question: "{question}"
 Answer with only one word: Quantitative or Qualitative.
