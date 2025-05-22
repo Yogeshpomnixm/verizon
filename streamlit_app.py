@@ -125,7 +125,7 @@ Columns:
 
     # Chat input
     with st.form("chat_form", clear_on_submit=True):
-        user_question = st.text_input("Ask a question about your data:", key="user_input")
+        user_question = st.chat_input("Ask anything") #st.text_input("Ask a question about your data:", key="user_input")
         submitted = st.form_submit_button("Submit")
 
     if submitted and user_question.strip():
