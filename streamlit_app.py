@@ -133,7 +133,7 @@ Columns:
     # Chat input (at bottom)
     user_question = st.chat_input("Ask anything...")
     if user_question:
-      st.write("You asked:", user_question)
+      st.write(f"**You:**, user_question)
       with st.spinner("..."):
         time.sleep(2)  # Simulate a delay
         
