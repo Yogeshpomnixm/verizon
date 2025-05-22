@@ -5,6 +5,7 @@ import openai
 st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
 st.title("💬 omniSense Chatbot")
 
+
 # --- API Key Input ---
 user_api_key = st.text_input("🔑 Enter your OpenAI API Key:", type="password")
 
