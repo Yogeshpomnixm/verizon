@@ -88,7 +88,7 @@ def ask_SmartResponse(user_question, result):
         The user asked: "{user_question}"
         The answer is: {result}
 
-        Please respond in a natural and intelligent tone, like a data assistant, using complete English sentences.
+        Please respond in a natural and intelligent tone, like a helpful data assistant. Use complete English sentences and include bullet-point notes where appropriate to summarize key points.
         """
 
     polished_response = openai.chat.completions.create(
@@ -134,7 +134,7 @@ Columns:
     user_question = st.chat_input("Ask anything...")
     if user_question:
       st.write("You asked:", user_question)
-      with st.spinner():
+      with st.spinner("..."):
         time.sleep(2)  # Simulate a delay
         
         try:
