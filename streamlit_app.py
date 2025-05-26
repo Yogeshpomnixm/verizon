@@ -64,7 +64,7 @@ def ask_gpt_for_python_expression(question, table_structure):
 - "Use SUM(amount), Average(amount), min(amount), max(amount), etc. for calculations unless specified otherwise." 
 - "Ensure all string comparisons are exact (e.g., unit = 'Austin')." 
 - "Only generate a SQL query. Do not add any explanatory text." 
-- User Question Placeholder: "User Question: {user_question}" 
+- User Question Placeholder: "User Question: {question}" 
 - Expected Output: "SQL Query:" 
 Putting it Together (Example Prompt Structure): 
 You are an AI assistant that converts natural language questions into SQL queries for a financial transactions database. The database has a single table. 
@@ -152,7 +152,7 @@ uploaded_file = st.file_uploader("📎 Upload your CSV data", type="csv")
 if uploaded_file:
     df = load_data(uploaded_file)
     # 🔧 Ensure Date column is datetime
-    if 'Month' in df.columns:
+    if 'Date' in df.columns:
          df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
     context = format_data_context(df)
 
@@ -161,11 +161,9 @@ Table Name: VerizonData
 
 Columns:
 - Unit (text)
-- Category (text)
-- Month (text or date)
-- Year (text)
-- TimeFrame (text)
-- Amount (numeric)
+- category (text)
+- date (date)
+- amount (DECIMAL)
 """
 
     # Show previous chat history
