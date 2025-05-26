@@ -1,5 +1,6 @@
 streamlit
 openai
 pandas
+pyodbc
 faiss-cpu
 scikit-learn
