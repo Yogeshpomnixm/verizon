@@ -195,7 +195,7 @@ Columns:
         if question_type.lower() == "quantitative":
             try:
                 python_expr = ask_gpt_for_python_expression(user_question, table_structure)
-                //result = eval(python_expr, {"df": df, "pd": pd})
+                #result = eval(python_expr, {"df": df, "pd": pd})
                 response = str(python_expr)
                 #response=ask_SmartResponse(user_question,result)
             except Exception as e:
