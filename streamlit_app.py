@@ -152,7 +152,7 @@ uploaded_file = st.file_uploader("📎 Upload your CSV data", type="csv")
 if uploaded_file:
     df = load_data(uploaded_file)
     # 🔧 Ensure Date column is datetime
-     if 'Month' in df.columns:
+    if 'Month' in df.columns:
          df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
     context = format_data_context(df)
 
@@ -196,7 +196,7 @@ Columns:
             try:
                 python_expr = ask_gpt_for_python_expression(user_question, table_structure)
                 result = eval(python_expr, {"df": df, "pd": pd})
-                #response = str(python_expr)
+                #response = str(result)
                 response=ask_SmartResponse(user_question,result)
             except Exception as e:
                 response = f"❌ Error evaluating expression: {e}"
