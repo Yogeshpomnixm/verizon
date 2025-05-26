@@ -1,6 +1,5 @@
+curl
+apt-transport-https
+gnupg
 unixodbc
 unixodbc-dev
-gcc
-g++
-python3-dev
-freetds-dev
