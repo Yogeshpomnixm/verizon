@@ -2,11 +2,52 @@ import streamlit as st
 import pandas as pd
 import openai
 import time
+import io # Added for df.info() debugging
+import pyodbc
+# --- DATABASE CONFIG ---
+server = 'bizlyzer.database.windows.net,1433;'  # e.g., 'localhost\\SQLEXPRESS' or '192.168.1.10'
+database = 'BizlyzerBeta;'
+username = 'BizlyzerDBA;'
+password = 'B1zlyz3rDBA;'
 
-#---Set the page title---
+# --- DATABASE CONNECTION FUNCTION ---
+def get_connection():
+    try:
+        conn = pyodbc.connect(
+          "DRIVER={ODBC Driver 17 for SQL Server};"
+          "SERVER=bizlyzer.database.windows.net,1433;"
+          "DATABASE=BizlyzerBeta;"
+          "UID=BizlyzerDBA;"
+          "PWD=B1zlyz3rDBA;"
+          "TrustServerCertificate=yes;"
+        )
+        return conn
+    except Exception as e:
+        st.error(f"Error connecting to the database: {e}")
+        return None
+
+# --- FETCH DATA BASED ON USER QUERY ---
+def run_query(user_query):
+    conn = get_connection()
+    if conn:
+        #st.info("✅ Connected to database")
+        try:
+            df = pd.read_sql(user_query, conn)
+            #st.success("✅ Data fetched successfully!")
+            #st.dataframe(df)  # Show the data
+            return df
+        except Exception as e:
+            #st.error(f"❌ Query error: {e}")
+            return "Query error: {e}"
+        finally:
+            conn.close()
+    else:
+        #st.error("❌ Failed to connect to the database.")
+        return "Failed to connect to the database."
+
+# --- Set the page title ---
 st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
 st.title("💬 omniSense ChatBot")
-
 
 # --- API Key Input ---
 user_api_key = st.text_input("🔑 Enter your OpenAI API Key:", type="password")
@@ -18,17 +59,20 @@ if not user_api_key:
 # Set the API key
 openai.api_key = user_api_key
 
+
 # --- Load CSV ---
 @st.cache_data
 def load_data(file):
     return pd.read_csv(file)
 
-# --- Format Data Context ---
+# --- Format Data Context for Qualitative Questions ---
 def format_data_context(df):
     context = ""
+    # Take a smaller sample for context to avoid excessive token usage
     sample = df.head(5).fillna("N/A")
-    for _, row in sample.iterrows():
-        context += "\n" + "\n".join([f"{col}: {row[col]}" for col in df.columns]) + "\n"
+    context += "Here are the first 5 rows of your data:\n"
+    context += sample.to_string() + "\n"
+    context += f"The columns are: {', '.join(df.columns)}\n"
     return context
 
 # --- Classify Question ---
@@ -49,39 +93,59 @@ Answer with only one word: Quantitative or Qualitative.
     return response.choices[0].message.content.strip()
 
 # --- Generate Python Expression ---
-def ask_gpt_for_python_expression(question, table_structure):
+def ask_gpt_for_python_expression(user_question):
     prompt = f"""
-- System Role: "You are an AI assistant that converts natural language questions into SQL queries for a financial transactions database. The database has a single table with the following schema:" 
-- Schema Definition: 
-- unit (TEXT): Represents the location or outlet. Examples: 'Austin', 'Seattle'. 
-- category (TEXT): Describes the type of transaction. Examples: 'sales', 'expenses'. 
-- date (DATE): The date of the transaction. 
-- amount (DECIMAL): The monetary value. 
-- Instructions: 
-- "When a user asks for a location or unit or city or site, map it to the unit column." examples: Basking Ridge, Cary, Irving, etc. 
-- "When a user asks for a type of activity, category, expense, income, map it to the category column." examples: Food cost, sales, catering sales, etc. 
-- "For month and year requests, use MONTH(date) and YEAR(date) functions." 
-- "Use SUM(amount), Average(amount), min(amount), max(amount), etc. for calculations unless specified otherwise." 
-- "Ensure all string comparisons are exact (e.g., unit = 'Austin')." 
-- "Only generate a SQL query. Do not add any explanatory text." 
-- User Question Placeholder: "User Question: {question}" 
-- Expected Output: "SQL Query:" 
-Putting it Together (Example Prompt Structure): 
-You are an AI assistant that converts natural language questions into SQL queries for a financial transactions database. The database has a single table. 
-Examples of user_question that I will give you, and the sql query output that you will return: 
-User Question: What were the total sales for Austin in April 2025? 
-SQL Query: SELECT SUM(amount) FROM your_table WHERE unit = 'Austin' AND category = 'sales' AND MONTH(date) = 4 AND YEAR(date) = 2025; 
-User Question: Show me the expenses for Seattle last month. 
-SQL Query: SELECT SUM(amount) FROM your_table WHERE unit = 'Seattle' AND category = 'expenses' AND date >= DATEADD(month, DATEDIFF(month, 0, GETDATE()) - 1, 0) AND date < DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0); 
-Few Table values entries: 
-Columns: Unit, category, date, amount 
-Values: 
-Basking ridge, food cost, 04/28/2025, 35654.23 
-Irving, sales, 02/27/2024, 4399870 
-Cary, food cost, 01/28/2025, 2333.45 
-Basking ridge, catering sales, 11/28/2024, 2333.44 
-Irving, insurance, 09/28/2024, 88943
-With this info, the user_question is "{question}", generate the sql query for the same.
+System Role:
+You are an AI assistant that converts natural language questions into **SQL Server SELECT queries** for a financial transactions database. The database has a single table.
+
+Schema Definition:
+- Table Name: Z_Verizonomnisense
+- unit (TEXT): Represents the location or outlet. Examples: 'Austin', 'Seattle'.
+- category (TEXT): Describes the type of transaction. Examples: 'sales', 'expenses'.
+- date (DATE): The date of the transaction.
+- amount (DECIMAL(18,0)): The monetary value.
+
+Instructions:
+- 🔒 **Only generate SELECT queries. Do NOT generate INSERT, UPDATE, DELETE, TRUNCATE, DROP, ALTER, or any DDL/DML/maintenance queries.**
+- 🔎 Always generate queries from a read-only perspective for data **retrieval** only.
+- 📅 Use `MONTH(date)` and `YEAR(date)` functions for month/year filtering.
+- 🧮 For aggregations, use SQL Server-compatible functions like:
+  - `SUM(amount)`, `AVG(amount)`, `MIN(amount)`, `MAX(amount)`, `COUNT(*)`, etc.
+- 🗃 Use `GROUP BY`, `ORDER BY`, `HAVING`, and `WHERE` clauses as needed.
+- 🧵 Use `TOP N` (e.g., `SELECT TOP 1 ...`) instead of `LIMIT`.
+- 🔤 Match strings exactly — e.g., `unit = 'Austin'`, not `LIKE '%Austin%'`.
+- ❌ Do not change or auto-correct user input (unit names, categories, dates, etc.) — use values exactly as provided.
+- 🧠 Do not assume corrections — if a user types "Alphretta" instead of "Alpharetta", use it exactly as "Alphretta".
+- 📜 Do not add explanation or commentary. Output only the SQL query, no markdown or code block.
+- 🧱 Always assume the database is SQL Server (T-SQL syntax).
+- 🧑‍💼 Do not attempt to infer missing columns or structure — only use the provided schema.
+
+Examples:
+
+User Question: What were the total sales for Austin in April 2025?  
+SQL Query: SELECT SUM(amount) FROM Z_Verizonomnisense WHERE unit = 'Austin' AND category = 'sales' AND MONTH(date) = 4 AND YEAR(date) = 2025;
+
+User Question: Show me the top category by total amount.  
+SQL Query: SELECT TOP 1 category, SUM(amount) AS total_amount FROM Z_Verizonomnisense GROUP BY category ORDER BY total_amount DESC;
+
+User Question: How many transactions did Irving have in 2024?  
+SQL Query: SELECT COUNT(*) FROM Z_Verizonomnisense WHERE unit = 'Irving' AND YEAR(date) = 2024;
+
+User Question: Give me the average expense in Basking Ridge for November 2023.  
+SQL Query: SELECT AVG(amount) FROM Z_Verizonomnisense WHERE unit = 'Basking Ridge' AND category = 'expenses' AND MONTH(date) = 11 AND YEAR(date) = 2023;
+
+User Question: What’s the maximum sales recorded in Alphretta?  
+SQL Query: SELECT MAX(amount) FROM Z_Verizonomnisense WHERE unit = 'Alphretta' AND category = 'sales';
+
+User Question: Which category has the lowest total amount?  
+SQL Query: SELECT TOP 1 category, SUM(amount) AS total_amount FROM Z_Verizonomnisense GROUP BY category ORDER BY total_amount ASC;
+
+User Question: Give me all data for Cary in 2025.  
+SQL Query: SELECT * FROM Z_Verizonomnisense WHERE unit = 'Cary' AND YEAR(date) = 2025;
+
+User Question Placeholder:
+User Question: {user_question}  
+Expected Output: SQL Query:
 """
     response = openai.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -107,9 +171,12 @@ Now, based on this data, answer the following question:
 
 # --- Smart response Generator ---
 def ask_SmartResponse(user_question, result):
+    # Ensure result is a string, especially if it's a number or a list
+    result_str = str(result)
+
     polish_prompt = f"""
     The user asked: "{user_question}"
-    The core answer or result is: {result}
+    The core answer or result is: {result_str}
 
     Please respond in a natural, helpful, and intelligent tone, like a helpful data assistant.
     Focus on directly answering the user's question based on the provided result.
@@ -136,74 +203,70 @@ def ask_SmartResponse(user_question, result):
     """
 
     polished_response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": polish_prompt}]
-        )
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": polish_prompt}]
+    )
 
     return polished_response.choices[0].message.content.strip()
-    
 
 # --- Session state for chat history ---
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# --- Upload CSV ---
-uploaded_file = st.file_uploader("📎 Upload your CSV data", type="csv")
-if uploaded_file:
-    df = load_data(uploaded_file)
-    # 🔧 Ensure Date column is datetime
-    if 'Date' in df.columns:
-         df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-    context = format_data_context(df)
+# --- Remove CSV upload logic ---
+# Assume `run_query()` directly queries your SQL database (e.g., Z_Verizonomnisense)
 
-    table_structure = """
-Table Name: VerizonData
+# Show previous chat history
+for entry in st.session_state.chat_history:
+    st.markdown(f"**You:** {entry['question']}")
+    st.markdown(f"**omniSense:** {entry['answer']}")
 
-Columns:
-- Unit (text)
-- category (text)
-- date (date)
-- amount (DECIMAL)
-"""
+# Chat input (at bottom)
+user_question = st.chat_input("Ask anything...")
+if user_question:
+    st.write("You:", user_question)
+    with st.spinner("Processing..."):
+        time.sleep(1)  # Simulate a short delay
 
-    # Show previous chat history
-    for entry in st.session_state.chat_history:
-        st.markdown(f"**You:** {entry['question']}")
-        st.markdown(f"**omniSense:** {entry['answer']}")
-
-    # Chat input
-    #with st.form("chat_form", clear_on_submit=True):
-        #user_question = st.chat_input("Ask anything") #st.text_input("Ask a question about your data:", key="user_input")
-        #submitted = st.form_submit_button("Submit")
-   
-    #if submitted and user_question.strip():
-    # Chat input (at bottom)
-    user_question = st.chat_input("Ask anything...")
-    if user_question:
-      st.write("You:", user_question)
-      with st.spinner("..."):
-        time.sleep(2)  # Simulate a delay
-        
         try:
             question_type = classify_question_type(user_question)
         except Exception as e:
             st.error(f"❌ Error classifying question: {e}")
-            st.stop()
+            st.stop()  # Stop execution if classification fails
 
         if question_type.lower() == "quantitative":
             try:
-                python_expr = ask_gpt_for_python_expression(user_question, table_structure)
-                result = eval(python_expr, {"df": df, "pd": pd})
-                #response = str(result)
-                response=ask_SmartResponse(user_question,result)
+                python_expr = ask_gpt_for_python_expression(user_question)
+
+                # --- Clean the LLM's output ---
+                if python_expr.startswith("SQL Query:"):
+                    python_expr = python_expr.replace("SQL Query:", "").strip()
+                else:
+                    python_expr = python_expr.strip()
+
+                # --- Run SQL query from expression ---
+                result_df = run_query(python_expr)
+                if result_df is not None and not result_df.empty:
+                    if result_df.shape == (1, 1):
+                        result_value = result_df.iloc[0, 0]
+                        response = ask_SmartResponse(user_question, result_value)
+                    else:
+                        response = ask_SmartResponse(user_question, result_df)
+                else:
+                    response = ask_SmartResponse(user_question, "No data returned for the query.")
+
             except Exception as e:
-                response = f"❌ Error evaluating expression: {e}"
-        else:
+                response = f"❌ I couldn't process that request due to an error: `{e}`. " \
+                           f"The attempted expression was: `{python_expr}`. Please check your table or column names."
+
+        else:  # Qualitative
             try:
-                response = ask_openai(user_question, context)
-                response=ask_SmartResponse(user_question,response)
+                # Minimal context or static schema assumption (e.g., 'unit', 'category', 'date', 'amount')
+                context = "The table contains data about transactions with columns like unit, category, date, and amount."
+                raw_response = ask_openai(user_question, context)
+                response = ask_SmartResponse(user_question, raw_response)
             except Exception as e:
-                response = f"❌ Error generating response: {e}"
+                response = f"❌ Error generating qualitative response: {e}"
 
         # Store in chat history
         st.session_state.chat_history.append({
@@ -211,7 +274,109 @@ Columns:
             "answer": response
         })
 
-        # Refresh UI
         st.rerun()
-else:
-    st.info("📥 Please upload a CSV file to begin.")
+        
+# # --- Upload CSV ---
+# uploaded_file = st.file_uploader("📎 Upload your CSV data", type="csv")
+# if uploaded_file:
+#     df = load_data(uploaded_file)
+
+#     # --- PRIMARY FIX: Standardize all column names to lowercase FIRST ---
+#     # This ensures consistency with the AI's generated queries ('unit', 'category', 'date', 'amount')
+#     df.columns = df.columns.str.lower()
+
+#     # 🔧 Ensure 'date' column (now lowercase) is datetime
+#     # Check for 'date' (lowercase) after standardizing column names
+#     if 'date' in df.columns:
+#         df['date'] = pd.to_datetime(df['date'], errors='coerce')
+#         # Drop rows where 'date' conversion failed (results in NaT)
+#         df.dropna(subset=['date'], inplace=True)
+#     else:
+#         st.warning("⚠️ 'date' column not found or not parsable. Date-based queries may not work correctly.")
+
+#     # Convert 'amount' to numeric, coercing errors to NaN
+#     if 'amount' in df.columns:
+#         df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
+#         # Drop rows where amount is not numeric (results in NaN)
+#         df.dropna(subset=['amount'], inplace=True)
+#     else:
+#         st.warning("⚠️ 'amount' column not found or not parsable. Quantitative queries may not work correctly.")
+
+#     # --- Debugging Prints (Optional, remove after testing) ---
+#     # st.write("--- Debugging DataFrame Info ---")
+#     # buffer = io.StringIO()
+#     # df.info(buf=buffer)
+#     # st.text(buffer.getvalue())
+#     # st.write("--- Debugging DataFrame Head ---")
+#     # st.dataframe(df.head())
+#     # st.write(f"Unique 'unit' values: {df['unit'].unique()}")
+#     # st.write(f"Unique 'category' values: {df['category'].unique()}")
+#     # st.write(f"Years in 'date' column: {df['date'].dt.year.unique() if 'date' in df.columns else 'N/A'}")
+#     # --- End Debugging Prints ---
+
+#     # Prepare context for qualitative questions
+#     context = format_data_context(df)
+
+#     # Show previous chat history
+#     for entry in st.session_state.chat_history:
+#         st.markdown(f"**You:** {entry['question']}")
+#         st.markdown(f"**omniSense:** {entry['answer']}")
+
+#     # Chat input (at bottom)
+#     user_question = st.chat_input("Ask anything...")
+#     if user_question:
+#         st.write("You:", user_question)
+#         with st.spinner("Processing..."):
+#             time.sleep(1) # Simulate a short delay
+
+#             try:
+#                 question_type = classify_question_type(user_question)
+#             except Exception as e:
+#                 st.error(f"❌ Error classifying question: {e}")
+#                 st.stop() # Stop execution if classification fails
+
+#             if question_type.lower() == "quantitative":
+#                 try:
+#                     python_expr = ask_gpt_for_python_expression(user_question)
+
+#                     # --- IMPORTANT FIX: Clean the LLM's output ---
+#                     # Remove any "Pandas Expression:" prefix if the LLM includes it
+#                     if python_expr.startswith("SQL Query:"):
+#                         python_expr = python_expr.replace("SQL Query:", "").strip()
+#                     else:
+#                         python_expr = python_expr.strip()
+                    
+#                       # Run the query
+#                     result_df = run_query(python_expr)
+#                     if result_df is not None and not result_df.empty:
+#                     # Try to extract a single value if this is an aggregate (e.g., SUM)
+#                         if result_df.shape == (1, 1):
+#                             result_value = result_df.iloc[0, 0]
+#                             response = ask_SmartResponse(user_question, result_value)
+#                         else:
+#                             response = ask_SmartResponse(user_question, result_df)
+#                     else:
+#                         response = ask_SmartResponse(user_question, "No data returned for the query.")
+
+#                 except Exception as e:
+#                     # Provide a more informative error message to the user for quantitative queries
+#                     response = f"❌ I couldn't process that quantitative request due to an error: `{e}`. " \
+#                                f"The attempted expression was: `{python_expr}`. " \
+#                                "Please try rephrasing your question or ensure your data columns match the expected format (unit, category, date, amount)."
+#             else: # Qualitative question
+#                 try:
+#                     raw_response = ask_openai(user_question, context)
+#                     response = ask_SmartResponse(user_question, raw_response)
+#                 except Exception as e:
+#                     response = f"❌ Error generating qualitative response: {e}"
+
+#             # Store in chat history
+#             st.session_state.chat_history.append({
+#                 "question": user_question,
+#                 "answer": response
+#             })
+
+#             # Refresh UI to show new chat history
+#             st.rerun()
+# else:
+#     st.info("📥 Please upload a CSV file to begin.")
