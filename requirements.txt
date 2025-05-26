@@ -2,7 +2,5 @@ streamlit
 openai
 pandas
 pyodbc
-sqlalchemy
-pymssql
 faiss-cpu
 scikit-learn
