@@ -30,7 +30,7 @@ def get_connection():
 # --- FETCH DATA BASED ON USER QUERY ---
 def run_query(user_query):
     conn = get_connection()
-     st.info("✅ Connected to database" +conn)
+     
     if conn:
         st.info("✅ Connected to database")
         try:
