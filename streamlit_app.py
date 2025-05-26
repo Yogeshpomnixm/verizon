@@ -6,20 +6,22 @@ import io # Added for df.info() debugging
 import pyodbc
 
 # --- DATABASE CONFIG ---
-server = 'bizlyzer.database.windows.net,1433;'  # e.g., 'localhost\\SQLEXPRESS' or '192.168.1.10'
-database = 'BizlyzerBeta;'
-username = 'BizlyzerDBA;'
-password = 'B1zlyz3rDBA;'
+
+# server = 'bizlyzer.database.windows.net,1433;'  # e.g., 'localhost\\SQLEXPRESS' or '192.168.1.10'
+# database = 'BizlyzerBeta;'
+# username = 'BizlyzerDBA;'
+# password = 'B1zlyz3rDBA;'
 
 # --- DATABASE CONNECTION FUNCTION ---
 def get_connection():
     try:
+        secrets = st.secrets["database"]
         conn = pyodbc.connect(
-          "DRIVER={ODBC Driver 18 for SQL Server};"
-          "SERVER=bizlyzer.database.windows.net,1433;"
-          "DATABASE=BizlyzerBeta;"
-          "UID=BizlyzerDBA;"
-          "PWD=B1zlyz3rDBA;"
+          "DRIVER={{{secrets['driver']}}}"
+          "SERVER={secrets['server']}"
+          "DATABASE={secrets['database']}"
+          "UID={secrets['username']}"
+          "PWD={secrets['password']}"
           "TrustServerCertificate=yes;"
         )
         return conn
