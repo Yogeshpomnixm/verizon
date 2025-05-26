@@ -15,26 +15,38 @@ import pyodbc
 # --- DATABASE CONNECTION FUNCTION ---
 def get_connection():
     try:
-        st.write("Connecte:")
+        st.write("Attempting to connect to database...")
         secrets = st.secrets["database"]
-        st.write("Connecte:"+ {{{secrets['driver']}}})
-        conn = pyodbc.connect(
-          "DRIVER={{{secrets['driver']}}}"
-          "SERVER={secrets['server']}"
-          "DATABASE={secrets['database']}"
-          "UID={secrets['username']}"
-          "PWD={secrets['password']}"
-          "TrustServerCertificate=yes;"
+
+        # Corrected f-string for printing the driver
+        st.write(f"Using driver: {secrets['driver']}")
+
+        # Corrected f-string for the connection string
+        # Each parameter needs to be separated by a semicolon within the string
+        conn_str = (
+            f"DRIVER={secrets['driver']};"
+            f"SERVER={secrets['server']};"
+            f"DATABASE={secrets['database']};"
+            f"UID={secrets['username']};"
+            f"PWD={secrets['password']};"
+            "TrustServerCertificate=yes;" # This is specific to SQL Server
         )
+
+        conn = pyodbc.connect(conn_str)
+        st.success("Successfully connected to the database!")
         return conn
     except Exception as e:
         st.error(f"Error connecting to the database: {e}")
+        st.info("Please check your database credentials in Streamlit Cloud secrets, "
+                "database firewall rules, and ensure the correct ODBC driver "
+                "is installed via packages.txt.")
         return None
 
 # --- FETCH DATA BASED ON USER QUERY ---
 def run_query(user_query):
+    st.write(user_query)
     conn = get_connection()
-     
+    st.write(conn)
     if conn:
         st.info("✅ Connected to database")
         try:
