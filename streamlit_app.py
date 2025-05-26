@@ -15,7 +15,9 @@ import pyodbc
 # --- DATABASE CONNECTION FUNCTION ---
 def get_connection():
     try:
+        st.write("Connecte:")
         secrets = st.secrets["database"]
+        st.write("Connecte:"+ {{{secrets['driver']}}})
         conn = pyodbc.connect(
           "DRIVER={{{secrets['driver']}}}"
           "SERVER={secrets['server']}"
