@@ -17,8 +17,7 @@ def get_connection():
         secrets = st.secrets["database"]
 
         # Corrected f-string for printing the driver
-        #st.write(f"Using driver: {secrets['driver']}")
-
+        st.write(f"Using driver: {secrets['driver']}")
         # Corrected f-string for the connection string
         # Each parameter needs to be separated by a semicolon within the string
         conn_str = (
