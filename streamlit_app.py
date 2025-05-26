@@ -4,22 +4,20 @@ import openai
 import time
 import io # Added for df.info() debugging
 import pyodbc
-
 # --- DATABASE CONFIG ---
-
-# server = 'bizlyzer.database.windows.net,1433;'  # e.g., 'localhost\\SQLEXPRESS' or '192.168.1.10'
-# database = 'BizlyzerBeta;'
-# username = 'BizlyzerDBA;'
-# password = 'B1zlyz3rDBA;'
+server = 'bizlyzer.database.windows.net,1433;'  # e.g., 'localhost\\SQLEXPRESS' or '192.168.1.10'
+database = 'BizlyzerBeta;'
+username = 'BizlyzerDBA;'
+password = 'B1zlyz3rDBA;'
 
 # --- DATABASE CONNECTION FUNCTION ---
 def get_connection():
     try:
-        st.write("Attempting to connect to database...")
+        #st.write("Attempting to connect to database...")
         secrets = st.secrets["database"]
 
         # Corrected f-string for printing the driver
-        st.write(f"Using driver: {secrets['driver']}")
+        #st.write(f"Using driver: {secrets['driver']}")
 
         # Corrected f-string for the connection string
         # Each parameter needs to be separated by a semicolon within the string
@@ -44,23 +42,21 @@ def get_connection():
 
 # --- FETCH DATA BASED ON USER QUERY ---
 def run_query(user_query):
-    st.write(user_query)
     conn = get_connection()
-    st.write(conn)
     if conn:
         st.info("✅ Connected to database")
         try:
             df = pd.read_sql(user_query, conn)
-            st.success("✅ Data fetched successfully!")
+            #st.success("✅ Data fetched successfully!")
             #st.dataframe(df)  # Show the data
             return df
         except Exception as e:
-            st.error(f"❌ Query error: {e}")
+            #st.error(f"❌ Query error: {e}")
             return "Query error: {e}"
         finally:
             conn.close()
     else:
-        st.error("❌ Failed to connect to the database.")
+        #st.error("❌ Failed to connect to the database.")
         return "Failed to connect to the database."
 
 # --- Set the page title ---
