@@ -15,7 +15,7 @@ password = 'B1zlyz3rDBA;'
 def get_connection():
     try:
         conn = pyodbc.connect(
-          "DRIVER={ODBC Driver 17 for SQL Server};"
+          "DRIVER={ODBC Driver 18 for SQL Server};"
           "SERVER=bizlyzer.database.windows.net,1433;"
           "DATABASE=BizlyzerBeta;"
           "UID=BizlyzerDBA;"
