@@ -4,6 +4,7 @@ import openai
 import time
 import io # Added for df.info() debugging
 import pyodbc
+
 # --- DATABASE CONFIG ---
 server = 'bizlyzer.database.windows.net,1433;'  # e.g., 'localhost\\SQLEXPRESS' or '192.168.1.10'
 database = 'BizlyzerBeta;'
