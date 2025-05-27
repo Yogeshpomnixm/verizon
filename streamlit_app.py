@@ -40,23 +40,54 @@ def get_connection():
         return None
 
 # --- FETCH DATA BASED ON USER QUERY ---
+# def run_query(user_query):
+#     conn = get_connection()
+#     if conn:
+#         st.info("✅ Connected to database")
+#         try:
+#             df = pd.read_sql(user_query, conn)
+#             #st.success("✅ Data fetched successfully!")
+#             #st.dataframe(df)  # Show the data
+#             return df
+#         except Exception as e:
+#             #st.error(f"❌ Query error: {e}")
+#             return "Query error: {e}"
+#         finally:
+#             conn.close()
+#     else:
+#         #st.error("❌ Failed to connect to the database.")
+#         return "Failed to connect to the database."
+
+# --- FETCH DATA BASED ON USER QUERY API ---
 def run_query(user_query):
-    conn = get_connection()
-    if conn:
-        st.info("✅ Connected to database")
-        try:
-            df = pd.read_sql(user_query, conn)
-            #st.success("✅ Data fetched successfully!")
-            #st.dataframe(df)  # Show the data
-            return df
-        except Exception as e:
-            #st.error(f"❌ Query error: {e}")
-            return "Query error: {e}"
-        finally:
-            conn.close()
-    else:
-        #st.error("❌ Failed to connect to the database.")
-        return "Failed to connect to the database."
+    url = f"https://omniservicesapi.azurewebsites.net/api/v1/Data/bizlyzer/{user_query}"
+    
+    params = {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+    }
+    
+    headers = {
+        "accept": "text/plain",  # Use "application/json" if API returns JSON
+        "X-API-KEY": "bdudu4@dkndf45d"
+    }
+
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()  # If API returns JSON
+                df = pd.DataFrame(data)
+                #st.success("✅ Data fetched successfully!")
+                return df
+            except ValueError:
+                return response.text  # If response is plain text
+        else:
+            return f"API call failed with status code {response.status_code}: {response.text}"
+    except Exception as e:
+        return f"API request error: {e}"
 
 # --- Set the page title ---
 st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
