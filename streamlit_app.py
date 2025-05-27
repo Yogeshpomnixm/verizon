@@ -4,12 +4,14 @@ import openai
 import time
 import io # Added for df.info() debugging
 import pyodbc
+import os
+import requests
 # --- DATABASE CONFIG ---
 server = 'bizlyzer.database.windows.net,1433;'  # e.g., 'localhost\\SQLEXPRESS' or '192.168.1.10'
 database = 'BizlyzerBeta;'
 username = 'BizlyzerDBA;'
 password = 'B1zlyz3rDBA;'
-
+API_KEY = os.getenv("OMNI_API_KEY")
 # --- DATABASE CONNECTION FUNCTION ---
 def get_connection():
     try:
