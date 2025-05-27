@@ -4,8 +4,6 @@ import openai
 import time
 import io # Added for df.info() debugging
 import pyodbc
-import os
-import requests
 # --- DATABASE CONFIG ---
 server = 'servername'  # e.g., 'localhost\\SQLEXPRESS' or '192.168.1.10'
 database = 'databasename;'
@@ -34,7 +32,7 @@ def get_connection():
         )
 
         conn = pyodbc.connect(conn_str)
-        st.success("Successfully connected to the database!")
+        #st.success("Successfully connected to the database!")
         return conn
     except Exception as e:
         st.error(f"Error connecting to the database: {e}")
@@ -44,66 +42,30 @@ def get_connection():
         return None
 
 # --- FETCH DATA BASED ON USER QUERY ---
-# def run_query(user_query):
-#     conn = get_connection()
-#     if conn:
-#         st.info("✅ Connected to database")
-#         try:
-#             df = pd.read_sql(user_query, conn)
-#             #st.success("✅ Data fetched successfully!")
-#             #st.dataframe(df)  # Show the data
-#             return df
-#         except Exception as e:
-#             #st.error(f"❌ Query error: {e}")
-#             return "Query error: {e}"
-#         finally:
-#             conn.close()
-#     else:
-#         #st.error("❌ Failed to connect to the database.")
-#         return "Failed to connect to the database."
-
-# --- FETCH DATA BASED ON USER QUERY API ---
 def run_query(user_query):
-   
-    url = f"https://omniservicesapi.azurewebsites.net/api/v1/Data/GetData"
-    
-    # This will go into the POST body, not the URL
-    payload = {
-        "databaseIdentifier": "bizlyzer",
-        "query": user_query  # Don't wrap in curly braces again
-    }
-
-        
-    headers = {
-        "accept": "text/plain",  # Use "application/json" if API returns JSON
-        "X-API-KEY": "bdudu4@dkndf45d",
-        "Content-Type": "application/json"
-    }
-   
-    try:
-        response = requests.post(url, headers=headers, json=payload)
-        
-        if response.status_code == 200:
-            try:
-                response = requests.post(url, headers=headers, json=payload)
-                #response.raise_for_status()  # Raises error for 4xx/5xx
-                data = response.json()
-                df = pd.DataFrame(data)                
-                #st.success("✅ Data fetched successfully!")
-                return df
-            except ValueError:
-                return response.text  # If response is plain text
-        else:
-            return f"API call failed with status code {response.status_code}: {response.text}"
-    except Exception as e:
-        return f"API request error: {e}"
+    conn = get_connection()
+    if conn:
+        st.info("✅ Connected to database")
+        try:
+            df = pd.read_sql(user_query, conn)
+            #st.success("✅ Data fetched successfully!")
+            #st.dataframe(df)  # Show the data
+            return df
+        except Exception as e:
+            #st.error(f"❌ Query error: {e}")
+            return "Query error: {e}"
+        finally:
+            conn.close()
+    else:
+        #st.error("❌ Failed to connect to the database.")
+        return "Failed to connect to the database."
 
 # --- Set the page title ---
 st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
 st.title("💬 omniSense ChatBot")
 
 # --- API Key Input ---
-user_api_key =f"{secrets['keyvalue']}" #st.text_input(OPENAI_APIKEY, type="password")
+user_api_key = st.text_input("🔑 Enter your OpenAI API Key:", type="password")
 
 if not user_api_key:
     st.warning("⚠️ Please enter your OpenAI API key to continue.")
