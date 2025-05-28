@@ -315,12 +315,14 @@ if user_question:
             except Exception as e:
                 # Case 2: An error occurred during query generation or execution.
                 # This provides error details to the user, including the problematic expression.
-                response = ask_SmartResponse(
-                    user_question,
-                    f"I couldn't process that request due to an error. "
-                    f"The attempted expression was: `{python_expr}`. "
-                    f"Please check your table or column names, or try a different question."
-                )
+                response = f"I'm sorry, I couldn't generate a response for that question right now. " \
+                f"Could you please try asking something else?"
+                # response = ask_SmartResponse(
+                #     user_question,
+                #     f"I couldn't process that request due to an error. "
+                #     f"The attempted expression was: `{python_expr}`. "
+                #     f"Please check your table or column names, or try a different question."
+                # )
 
         else:  # Qualitative
             try:
@@ -329,7 +331,9 @@ if user_question:
                 raw_response = ask_openai(user_question, context)
                 response = ask_SmartResponse(user_question, raw_response)
             except Exception as e:
-                response = f"❌ Error generating qualitative response: {e}"
+                #response = f"❌ Error generating qualitative response: {e}"
+                response = f"I'm sorry, I couldn't generate a response for that question right now. " \
+                f"Could you please try asking something else?"
 
         # Store in chat history
         st.session_state.chat_history.append({
