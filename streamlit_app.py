@@ -302,12 +302,25 @@ if user_question:
                     else:
                         response = ask_SmartResponse(user_question, result_df)
                 else:
-                    response = ask_SmartResponse(user_question, "No data returned for the query. don't use query word uese your question.")
+                    # Case 1: Query ran successfully but returned no rows.
+                    # This is where you want your "no data" smart answer.
+                    # Prompt for ask_SmartResponse: "No data was found for your specific question.
+                    # Please consider rephrasing or checking details."
+                    response = ask_SmartResponse(
+                        user_question,
+                        "I couldn't find any information for your specific question. "
+                        "Perhaps try rephrasing it or checking for typos."
+                    )
 
             except Exception as e:
-                response = ask_SmartResponse(user_question, "No data returned for the query. No user question is matched to data. don't use query word your question.")
-                #response = f"❌ I couldn't process that request due to an error: `{e}`. " \
-                           #f"The attempted expression was: `{python_expr}`. Please check your table or column names."
+                # Case 2: An error occurred during query generation or execution.
+                # This provides error details to the user, including the problematic expression.
+                response = ask_SmartResponse(
+                    user_question,
+                    f"I couldn't process that request due to an error. "
+                    f"The attempted expression was: `{python_expr}`. "
+                    f"Please check your table or column names, or try a different question."
+                )
 
         else:  # Qualitative
             try:
