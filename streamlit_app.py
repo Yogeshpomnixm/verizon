@@ -305,7 +305,7 @@ if user_question:
                     response = ask_SmartResponse(user_question, "No data returned for the query.")
 
             except Exception as e:
-                response = ask_SmartResponse(user_question, "No data returned for the query. No user question is matched to data.")
+                response = ask_SmartResponse(user_question, "No data returned for the query. No user question is matched to data. dont use query word your question.")
                 #response = f"❌ I couldn't process that request due to an error: `{e}`. " \
                            #f"The attempted expression was: `{python_expr}`. Please check your table or column names."
 
