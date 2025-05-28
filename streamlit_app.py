@@ -12,8 +12,8 @@ database = 'BizlyzerBeta;'
 username = 'BizlyzerDBA;'
 password = 'B1zlyz3rDBA;'
 API_KEY = os.getenv("OMNI_API_KEY")
-secrets = st.secrets["keyvalue"]
-OPENAI_APIKEY=f"{secrets['driver']}" #os.getenv("OPENAI_API_KEY")
+secrets = st.secrets["database"]
+OPENAI_APIKEY=f"{secrets['keyvalue']}" #os.getenv("OPENAI_API_KEY")
 # --- DATABASE CONNECTION FUNCTION ---
 def get_connection():
     try:
