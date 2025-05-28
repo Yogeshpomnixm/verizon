@@ -306,11 +306,13 @@ if user_question:
                     # This is where you want your "no data" smart answer.
                     # Prompt for ask_SmartResponse: "No data was found for your specific question.
                     # Please consider rephrasing or checking details."
-                    response = ask_SmartResponse(
-                        user_question,
-                        "I couldn't find any information for your specific question. "
-                        "Perhaps try rephrasing it or checking for typos."
-                    )
+                    response = f"I couldn't find any information for your specific question.  " \
+                    f"Perhaps try rephrasing it or checking for typos."
+                    # response = ask_SmartResponse(
+                    #     user_question,
+                    #     "I couldn't find any information for your specific question. "
+                    #     "Perhaps try rephrasing it or checking for typos."
+                    # )
 
             except Exception as e:
                 # Case 2: An error occurred during query generation or execution.
