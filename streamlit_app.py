@@ -106,7 +106,7 @@ if not user_api_key:
     st.stop()
 
 # Set the API key
-openai.api_key = user_api_key
+openai.api_key = OPENAI_APIKEY #user_api_key
 
 
 # --- Load CSV ---
