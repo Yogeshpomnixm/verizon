@@ -292,15 +292,15 @@ if user_question:
                     python_expr = python_expr.replace("SQL Query:", "").strip()
                 else:
                     python_expr = python_expr.strip()
-                st.write(python_expr)
+                
                 # --- Run SQL query from expression ---
                 result_df = run_query(python_expr)
                 if result_df is not None and not result_df.empty:
                     if result_df.shape == (1, 1):
                         result_value = result_df.iloc[0, 0]
-                        response = ask_SmartResponse(user_question, result_value)
+                        response = ask_SmartResponse(user_question, result_value)+{python_expr}
                     else:
-                        response = ask_SmartResponse(user_question, result_df)
+                        response = ask_SmartResponse(user_question, result_df)+{python_expr}
                 else:
                     # Case 1: Query ran successfully but returned no rows.
                     # This is where you want your "no data" smart answer.
