@@ -149,8 +149,8 @@ You are an AI assistant that converts natural language questions into **SQL Serv
 
 Schema Definition:
 - Table Name: Z_Verizonomnisense
-- unit (TEXT): Represents the location or outlet. Examples: 'Austin', 'Seattle'.
-- category (TEXT): Describes the type of transaction. Examples: 'sales', 'expenses'.
+- unit (TEXT): Represents the location, unit, food hall, site or outlet. Examples: 'Austin', 'Seattle'.
+- category (TEXT): Describes the type of transaction. Examples: 'sales', 'expenses', 'food cost', etc.
 - date (DATE): The date of the transaction.
 - amount (DECIMAL(18,0)): The monetary value.
 
@@ -298,9 +298,9 @@ if user_question:
                 if result_df is not None and not result_df.empty:
                     if result_df.shape == (1, 1):
                         result_value = result_df.iloc[0, 0]
-                        response =python_expr #ask_SmartResponse(user_question, result_value)
+                        response =ask_SmartResponse(user_question, result_value)
                     else:
-                        response =python_expr #ask_SmartResponse(user_question, result_df)
+                        response =ask_SmartResponse(user_question, result_df)
                 else:
                     # Case 1: Query ran successfully but returned no rows.
                     # This is where you want your "no data" smart answer.
