@@ -168,6 +168,30 @@ Instructions:
 - 📜 Do not add explanation or commentary. Output only the SQL query, no markdown or code block.
 - 🧱 Always assume the database is SQL Server (T-SQL syntax).
 - 🧑‍💼 Do not attempt to infer missing columns or structure — only use the provided schema.
+- We are provide the unit and Category list use below both list  
+Category List:
+Food Cost
+Product Costs
+Paper Cost
+Profit Before Fee and Admin
+Management Fee
+Sales
+Volume Allowances
+Labor Cost
+Profit/Loss Per Contract
+Supv/Clerk Wages
+Direct Fringe
+Direct Wages
+Travel
+Cafe Sales
+
+Unit List:
+Lake Mary
+Basking Ridge
+Alphretta
+Silver Spr
+Irving Tele
+Cary
 
 Examples:
 
