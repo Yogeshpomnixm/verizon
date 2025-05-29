@@ -292,7 +292,7 @@ if user_question:
                     python_expr = python_expr.replace("SQL Query:", "").strip()
                 else:
                     python_expr = python_expr.strip()
-                st.success(python_expr)
+                st.write(python_expr)
                 # --- Run SQL query from expression ---
                 result_df = run_query(python_expr)
                 if result_df is not None and not result_df.empty:
