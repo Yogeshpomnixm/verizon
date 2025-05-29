@@ -64,7 +64,7 @@ def get_connection():
 
 # --- FETCH DATA BASED ON USER QUERY API ---
 def run_query(user_query):
-    st.success(user_query)
+   
     url = f"https://omniservicesapi.azurewebsites.net/api/v1/Data/bizlyzer/{user_query}"
     
     params = {
@@ -292,7 +292,7 @@ if user_question:
                     python_expr = python_expr.replace("SQL Query:", "").strip()
                 else:
                     python_expr = python_expr.strip()
-
+                st.success(python_expr)
                 # --- Run SQL query from expression ---
                 result_df = run_query(python_expr)
                 if result_df is not None and not result_df.empty:
