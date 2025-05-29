@@ -64,7 +64,7 @@ def get_connection():
 
 # --- FETCH DATA BASED ON USER QUERY API ---
 def run_query(user_query):
-    st.info(user_query)
+    st.success(user_query)
     url = f"https://omniservicesapi.azurewebsites.net/api/v1/Data/bizlyzer/{user_query}"
     
     params = {
