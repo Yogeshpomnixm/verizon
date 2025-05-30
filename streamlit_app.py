@@ -7,37 +7,41 @@ import pyodbc
 import os
 import requests
 # --- DATABASE CONFIG ---
+server = 'bizlyzer.database.windows.net,1433;'  # e.g., 'localhost\\SQLEXPRESS' or '192.168.1.10'
+database = 'BizlyzerBeta;'
+username = 'BizlyzerDBA;'
+password = 'B1zlyz3rDBA;'
 API_KEY = os.getenv("OMNI_API_KEY")
 secrets = st.secrets["database"]
 OPENAI_APIKEY=f"{secrets['keyvalue']}" #os.getenv("OPENAI_API_KEY")
 # --- DATABASE CONNECTION FUNCTION ---
-# def get_connection():
-#     try:
-#         #st.write("Attempting to connect to database...")
-#         secrets = st.secrets["database"]
+def get_connection():
+    try:
+        #st.write("Attempting to connect to database...")
+        secrets = st.secrets["database"]
 
-#         # Corrected f-string for printing the driver
-#         st.write(f"Using driver: {secrets['driver']}")
-#         # Corrected f-string for the connection string
-#         # Each parameter needs to be separated by a semicolon within the string
-#         conn_str = (
-#             f"DRIVER={secrets['driver']};"
-#             f"SERVER={secrets['server']};"
-#             f"DATABASE={secrets['database']};"
-#             f"UID={secrets['username']};"
-#             f"PWD={secrets['password']};"
-#             "TrustServerCertificate=yes;" # This is specific to SQL Server
-#         )
+        # Corrected f-string for printing the driver
+        st.write(f"Using driver: {secrets['driver']}")
+        # Corrected f-string for the connection string
+        # Each parameter needs to be separated by a semicolon within the string
+        conn_str = (
+            f"DRIVER={secrets['driver']};"
+            f"SERVER={secrets['server']};"
+            f"DATABASE={secrets['database']};"
+            f"UID={secrets['username']};"
+            f"PWD={secrets['password']};"
+            "TrustServerCertificate=yes;" # This is specific to SQL Server
+        )
 
-#         conn = pyodbc.connect(conn_str)
-#         st.success("Successfully connected to the database!")
-#         return conn
-#     except Exception as e:
-#         st.error(f"Error connecting to the database: {e}")
-#         st.info("Please check your database credentials in Streamlit Cloud secrets, "
-#                 "database firewall rules, and ensure the correct ODBC driver "
-#                 "is installed via packages.txt.")
-#         return None
+        conn = pyodbc.connect(conn_str)
+        st.success("Successfully connected to the database!")
+        return conn
+    except Exception as e:
+        st.error(f"Error connecting to the database: {e}")
+        st.info("Please check your database credentials in Streamlit Cloud secrets, "
+                "database firewall rules, and ensure the correct ODBC driver "
+                "is installed via packages.txt.")
+        return None
 
 # --- FETCH DATA BASED ON USER QUERY ---
 # def run_query(user_query):
