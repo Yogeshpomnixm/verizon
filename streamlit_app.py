@@ -65,29 +65,25 @@ def get_connection():
 # --- FETCH DATA BASED ON USER QUERY API ---
 def run_query(user_query):
    
-    url = f"https://omniservicesapi.azurewebsites.net/api/v1/Data/GetData"
+    url = f"https://omniservicesapi.azurewebsites.net/api/v1/Data/bizlyzer/{user_query}"
     
-    # This will go into the POST body, not the URL
-    payload = {
-        "databaseIdentifier": "bizlyzer",
-        "query": user_query  # Don't wrap in curly braces again
+    params = {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
     }
-
-        
+    
     headers = {
         "accept": "text/plain",  # Use "application/json" if API returns JSON
-        "X-API-KEY": "bdudu4@dkndf45d",
-        "Content-Type": "application/json"
+        "X-API-KEY": "bdudu4@dkndf45d"
     }
    
     try:
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests.get(url, headers=headers, params=params)
         
         if response.status_code == 200:
             try:
-                response = requests.post(url, headers=headers, json=payload)
-                #response.raise_for_status()  # Raises error for 4xx/5xx
-                data = response.json()
+                data = response.json()  # If API returns JSON
                 df = pd.DataFrame(data)                
                 #st.success("✅ Data fetched successfully!")
                 return df
@@ -321,40 +317,33 @@ if user_question:
                     python_expr = python_expr.strip()
                 
                 # --- Run SQL query from expression ---
-                result_df = run_query(python_expr)
-                # if isinstance(result_df, pd.DataFrame):
+                result_df = run_query(python_expr)                
                 if result_df is not None and not result_df.empty:
                    
-                        if result_df.shape == (1, 1):
-                            result_value = result_df.iloc[0, 0]
-                            
-                            response = ask_SmartResponse(user_question, result_value)
-                        else:
-                            response = ask_SmartResponse(user_question, result_df)
+                    if result_df.shape == (1, 1):
+                        result_value = result_df.iloc[0, 0]
+                        
+                        response = ask_SmartResponse(user_question, result_value)
+                    else:
+                        response = ask_SmartResponse(user_question, result_df)
                 else:
-                        # Case 1: Query ran successfully but returned no rows.
-                        # This is where you want your "no data" smart answer.
-                        # Prompt for ask_SmartResponse: "No data was found for your specific question.
-                        # Please consider rephrasing or checking details."
-                        response = f"I couldn't find any information for your specific question.  " \
-                        f"Perhaps try rephrasing it or checking for typos."
-                        # response = ask_SmartResponse(
-                        #     user_question,
-                        #     "I couldn't find any information for your specific question. "
-                        #     "Perhaps try rephrasing it or checking for typos."
-                        # )
-                # else:
-                #     response = (
-                #         f"Unexpected result format from query execution: {type(result_df)}. "
-                #         f"Here is the result: {result_df} {python_expr}"
-                #     )                
-                
+                    # Case 1: Query ran successfully but returned no rows.
+                    # This is where you want your "no data" smart answer.
+                    # Prompt for ask_SmartResponse: "No data was found for your specific question.
+                    # Please consider rephrasing or checking details."
+                    response = f"I couldn't find any information for your specific question.  " \
+                    f"Perhaps try rephrasing it or checking for typos."
+                    # response = ask_SmartResponse(
+                    #     user_question,
+                    #     "I couldn't find any information for your specific question. "
+                    #     "Perhaps try rephrasing it or checking for typos."
+                    # )
 
             except Exception as e:
                 # Case 2: An error occurred during query generation or execution.
                 # This provides error details to the user, including the problematic expression.
                 response = f"I'm sorry, I couldn't generate a response for that question right now. " \
-                f"Could you please try asking something else?"
+                f"Could you please try asking something else? {e}"
                 # response = ask_SmartResponse(
                 #     user_question,
                 #     f"I couldn't process that request due to an error. "
