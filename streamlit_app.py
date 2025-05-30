@@ -63,27 +63,30 @@ def get_connection():
 #         return "Failed to connect to the database."
 
 # --- FETCH DATA BASED ON USER QUERY API ---
-def run_query(user_query):
-   
-    url = f"https://omniservicesapi.azurewebsites.net/api/v1/Data/bizlyzer/{user_query}"
+def run_query(user_query):   
+    url = f"https://omniservicesapi.azurewebsites.net/api/v1/Data/GetData"
     
-    params = {
-        "additionalProp1": "string",
-        "additionalProp2": "string",
-        "additionalProp3": "string"
+    # This will go into the POST body, not the URL
+    payload = {
+        "databaseIdentifier": "bizlyzer",
+        "query": user_query  # Don't wrap in curly braces again
     }
-    
+
+        
     headers = {
         "accept": "text/plain",  # Use "application/json" if API returns JSON
-        "X-API-KEY": "bdudu4@dkndf45d"
+        "X-API-KEY": "bdudu4@dkndf45d",
+        "Content-Type": "application/json"
     }
    
     try:
-        response = requests.get(url, headers=headers, params=params)
+        response = requests.post(url, headers=headers, json=payload)
         
         if response.status_code == 200:
             try:
-                data = response.json()  # If API returns JSON
+                response = requests.post(url, headers=headers, json=payload)
+                #response.raise_for_status()  # Raises error for 4xx/5xx
+                data = response.json()
                 df = pd.DataFrame(data)                
                 #st.success("✅ Data fetched successfully!")
                 return df
