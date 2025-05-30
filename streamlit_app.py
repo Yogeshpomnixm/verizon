@@ -319,8 +319,10 @@ if user_question:
                 # --- Run SQL query from expression ---
                 result_df = run_query(python_expr)
                 if result_df is not None and not result_df.empty:
+                    st.error(f"❌ Error classifying question:")
                     if result_df.shape == (1, 1):
                         result_value = result_df.iloc[0, 0]
+                        st.error(f"❌ Error classifying question:`{result_value}`")
                         response = ask_SmartResponse(user_question, result_value)
                     else:
                         response = ask_SmartResponse(user_question, result_df)
