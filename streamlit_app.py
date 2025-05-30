@@ -158,8 +158,7 @@ Instructions:
 - 🔒 **Only generate SELECT queries. Do NOT generate INSERT, UPDATE, DELETE, TRUNCATE, DROP, ALTER, or any DDL/DML/maintenance queries.**
 - 🔎 Always generate queries from a read-only perspective for data **retrieval** only.
 - 📅 Use `MONTH(date)` and `YEAR(date)` functions for month/year filtering.
-- 🧮 For aggregations, use SQL Server-compatible functions like:
-  - `SUM(amount)`, `AVG(amount)`, `MIN(amount)`, `MAX(amount)`, `COUNT(*)`, etc.
+- 🧮 For aggregations, use SQL Server-compatible functions. **Always provide a descriptive alias for aggregated columns** (e.g., `SUM(amount) AS TotalAmount`, `COUNT(*) AS TransactionCount`, `AVG(amount) AS AverageAmount`, `MAX(amount) AS MaxValue`, `MIN(amount) AS MinValue`).
 - 🗃 Use `GROUP BY`, `ORDER BY`, `HAVING`, and `WHERE` clauses as needed.
 - 🧵 Use `TOP N` (e.g., `SELECT TOP 1 ...`) instead of `LIMIT`.
 - 🔤 Match strings exactly — e.g., `unit = 'Austin'`, not `LIKE '%Austin%'`.
