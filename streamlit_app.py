@@ -342,7 +342,7 @@ if user_question:
                 # Case 2: An error occurred during query generation or execution.
                 # This provides error details to the user, including the problematic expression.
                 response = f"I'm sorry, I couldn't generate a response for that question right now. " \
-                f"Could you please try asking something else?"
+                f"Could you please try asking something else? `{python_expr}`"
                 # response = ask_SmartResponse(
                 #     user_question,
                 #     f"I couldn't process that request due to an error. "
