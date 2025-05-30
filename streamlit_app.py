@@ -158,7 +158,7 @@ Instructions:
 - 🔒 **Only generate SELECT queries. Do NOT generate INSERT, UPDATE, DELETE, TRUNCATE, DROP, ALTER, or any DDL/DML/maintenance queries.**
 - 🔎 Always generate queries from a read-only perspective for data **retrieval** only.
 - 📅 Use `MONTH(date)` and `YEAR(date)` functions for month/year filtering.
-- 🧮 For aggregations, use SQL Server-compatible functions. **Always provide a descriptive alias for aggregated columns** (e.g., `SUM(amount) AS TotalAmount`, `COUNT(*) AS TransactionCount`, `AVG(amount) AS AverageAmount`, `MAX(amount) AS MaxValue`, `MIN(amount) AS MinValue`,`MONTH(date) AS Month`,`Year(date) AS Year`).
+- 🧮 For aggregations, use SQL Server-compatible functions. **Always provide a descriptive alias for aggregated columns** (e.g., `SUM(amount) AS TotalAmount`, `COUNT(*) AS TransactionCount`, `AVG(amount) AS AverageAmount`, `MAX(amount) AS MaxValue`, `MIN(amount) AS MinValue`,`MONTH(date) AS Monthname`,`Year(date) AS Yearname`).
 - 🗃 Use `GROUP BY`, `ORDER BY`, `HAVING`, and `WHERE` clauses as needed.
 - 🧵 Use `TOP N` (e.g., `SELECT TOP 1 ...`) instead of `LIMIT`.
 - 🔤 Match strings exactly — e.g., `unit = 'Austin'`, not `LIKE '%Austin%'`.
@@ -319,10 +319,10 @@ if user_question:
                 # --- Run SQL query from expression ---
                 result_df = run_query(python_expr)
                 if result_df is not None and not result_df.empty:
-                    st.error(f"❌ Error classifying question:")
+                   
                     if result_df.shape == (1, 1):
                         result_value = result_df.iloc[0, 0]
-                        st.error(f"❌ Error classifying question:`{result_value}`")
+                        
                         response = ask_SmartResponse(user_question, result_value)
                     else:
                         response = ask_SmartResponse(user_question, result_df)
