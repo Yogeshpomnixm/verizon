@@ -13,7 +13,7 @@ username = 'BizlyzerDBA;'
 password = 'B1zlyz3rDBA;'
 API_KEY = os.getenv("OMNI_API_KEY")
 secrets = st.secrets["database"]
-OPENAI_APIKEY=f"{secrets['keyvalue']}" #os.getenv("OPENAI_API_KEY")
+#OPENAI_APIKEY=f"{secrets['keyvalue']}" #os.getenv("OPENAI_API_KEY")
 # --- DATABASE CONNECTION FUNCTION ---
 def get_connection():
     try:
@@ -101,7 +101,7 @@ st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
 st.title("💬 omniSense ChatBot")
 
 # --- API Key Input ---
-user_api_key = st.text_input(OPENAI_APIKEY, type="password") #f"{secrets['keyvalue']}"
+user_api_key = st.text_input("🔑 Enter your OpenAI API Key:", type="password") #f"{secrets['keyvalue']}"
 
 if not user_api_key:
     st.warning("⚠️ Please enter your OpenAI API key to continue.")
