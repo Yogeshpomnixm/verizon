@@ -63,7 +63,8 @@ def get_connection():
 #         return "Failed to connect to the database."
 
 # --- FETCH DATA BASED ON USER QUERY API ---
-def run_query(user_query):   
+def run_query(user_query):
+   
     url = f"https://omniservicesapi.azurewebsites.net/api/v1/Data/GetData"
     
     # This will go into the POST body, not the URL
@@ -320,33 +321,40 @@ if user_question:
                     python_expr = python_expr.strip()
                 
                 # --- Run SQL query from expression ---
-                result_df = run_query(python_expr)                
+                result_df = run_query(python_expr)
+                # if isinstance(result_df, pd.DataFrame):
                 if result_df is not None and not result_df.empty:
                    
-                    if result_df.shape == (1, 1):
-                        result_value = result_df.iloc[0, 0]
-                        
-                        response = ask_SmartResponse(user_question, result_value)
-                    else:
-                        response = ask_SmartResponse(user_question, result_df)
+                        if result_df.shape == (1, 1):
+                            result_value = result_df.iloc[0, 0]
+                            
+                            response = ask_SmartResponse(user_question, result_value)
+                        else:
+                            response = ask_SmartResponse(user_question, result_df)
                 else:
-                    # Case 1: Query ran successfully but returned no rows.
-                    # This is where you want your "no data" smart answer.
-                    # Prompt for ask_SmartResponse: "No data was found for your specific question.
-                    # Please consider rephrasing or checking details."
-                    response = f"I couldn't find any information for your specific question.  " \
-                    f"Perhaps try rephrasing it or checking for typos."
-                    # response = ask_SmartResponse(
-                    #     user_question,
-                    #     "I couldn't find any information for your specific question. "
-                    #     "Perhaps try rephrasing it or checking for typos."
-                    # )
+                        # Case 1: Query ran successfully but returned no rows.
+                        # This is where you want your "no data" smart answer.
+                        # Prompt for ask_SmartResponse: "No data was found for your specific question.
+                        # Please consider rephrasing or checking details."
+                        response = f"I couldn't find any information for your specific question.  " \
+                        f"Perhaps try rephrasing it or checking for typos."
+                        # response = ask_SmartResponse(
+                        #     user_question,
+                        #     "I couldn't find any information for your specific question. "
+                        #     "Perhaps try rephrasing it or checking for typos."
+                        # )
+                # else:
+                #     response = (
+                #         f"Unexpected result format from query execution: {type(result_df)}. "
+                #         f"Here is the result: {result_df} {python_expr}"
+                #     )                
+                
 
             except Exception as e:
                 # Case 2: An error occurred during query generation or execution.
                 # This provides error details to the user, including the problematic expression.
                 response = f"I'm sorry, I couldn't generate a response for that question right now. " \
-                f"Could you please try asking something else? {e}"
+                f"Could you please try asking something else?"
                 # response = ask_SmartResponse(
                 #     user_question,
                 #     f"I couldn't process that request due to an error. "
