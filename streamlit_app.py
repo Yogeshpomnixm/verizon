@@ -77,53 +77,22 @@ def run_query(user_query):
         "accept": "text/plain",  # Use "application/json" if API returns JSON
         "X-API-KEY": "bdudu4@dkndf45d"
     }
+   
     try:
         response = requests.get(url, headers=headers, params=params)
-
+        
         if response.status_code == 200:
             try:
-                data = response.json()  # Attempt to parse as JSON
-                # Check if data is a list of dicts (common for DataFrames) or a single dict
-                if isinstance(data, list) and all(isinstance(i, dict) for i in data):
-                    df = pd.DataFrame(data)
-                elif isinstance(data, dict):
-                    # If it's a single dict, convert it to a DataFrame with one row
-                    df = pd.DataFrame([data])
-                else:
-                    # If JSON but not in a typical DataFrame-friendly format
-                    return f"API returned JSON but not in a standard DataFrame format: {data}"
-
-                # st.success("✅ Data fetched successfully!") # Use only in a Streamlit app
+                data = response.json()  # If API returns JSON
+                df = pd.DataFrame(data)                
+                #st.success("✅ Data fetched successfully!")
                 return df
             except ValueError:
-                # This happens if response.json() fails because the content isn't JSON
-                print(f"Warning: API response for {url} was not valid JSON (status 200). Raw text received.")
-                return response.text  # Return the raw text if it's not JSON
+                return response.text  # If response is plain text
         else:
-            # API call failed with a non-200 status code
             return f"API call failed with status code {response.status_code}: {response.text}"
-    except requests.exceptions.RequestException as e:
-        # Catch network-related errors (e.g., connection refused, timeout)
-        return f"API request error: {e}"
     except Exception as e:
-        # Catch any other unexpected errors during the process
-        return f"An unexpected error occurred: {e}"
-    # try:
-    #     response = requests.get(url, headers=headers, params=params)
-        
-    #     if response.status_code == 200:
-    #         try:
-    #             data = response.json()  # If API returns JSON
-    #             df = pd.DataFrame(data)
-                
-    #             #st.success("✅ Data fetched successfully!")
-    #             return df
-    #         except ValueError:
-    #             return response.text  # If response is plain text
-    #     else:
-    #         return f"API call failed with status code {response.status_code}: {response.text}"
-    # except Exception as e:
-    #     return f"API request error: {e}"
+        return f"API request error: {e}"
 
 # --- Set the page title ---
 st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
