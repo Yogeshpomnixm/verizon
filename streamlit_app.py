@@ -67,18 +67,18 @@ def run_query(user_query):
    
     url = f"https://omniservicesapi.azurewebsites.net/api/v1/Data/GetData"
     
-    # This will go into the POST body, not the URL
-        payload = {
-            "databaseIdentifier": "bizlyzer",
-            "query": user_query  # Don't wrap in curly braces again
-        }
+   # This will go into the POST body, not the URL
+    payload = {
+                "databaseIdentifier": "bizlyzer",
+                "query": user_query  # Don't wrap in curly braces again
+    }
 
-            
-        headers = {
-            "accept": "text/plain",  # Use "application/json" if API returns JSON
-            "X-API-KEY": "bdudu4@dkndf45d",
-            "Content-Type": "application/json"
-        }
+                
+    headers = {
+                "accept": "text/plain",  # Use "application/json" if API returns JSON
+                "X-API-KEY": "bdudu4@dkndf45d",
+                "Content-Type": "application/json"
+    }
    
     try:
         response = requests.post(url, headers=headers, json=payload)
