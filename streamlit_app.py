@@ -101,7 +101,7 @@ st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
 st.title("💬 omniSense ChatBot")
 
 # --- API Key Input ---
-user_api_key = st.text_input(OPENAI_APIKEY, type="password") #f"{secrets['keyvalue']}"
+user_api_key = st.text_input("🔑 Enter your OpenAI API Key:", type="password") #f"{secrets['keyvalue']}"
 
 if not user_api_key:
     st.warning("⚠️ Please enter your OpenAI API key to continue.")
