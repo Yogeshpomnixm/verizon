@@ -65,21 +65,23 @@ def get_connection():
 # --- FETCH DATA BASED ON USER QUERY API ---
 def run_query(user_query):
    
-    url = f"https://omniservicesapi.azurewebsites.net/api/v1/Data/bizlyzer/{user_query}"
+    url = f"https://omniservicesapi.azurewebsites.net/api/v1/Data/GetData"
     
-    params = {
-        "additionalProp1": "string",
-        "additionalProp2": "string",
-        "additionalProp3": "string"
-    }
-    
-    headers = {
-        "accept": "text/plain",  # Use "application/json" if API returns JSON
-        "X-API-KEY": "bdudu4@dkndf45d"
-    }
+    # This will go into the POST body, not the URL
+        payload = {
+            "databaseIdentifier": "bizlyzer",
+            "query": user_query  # Don't wrap in curly braces again
+        }
+
+            
+        headers = {
+            "accept": "text/plain",  # Use "application/json" if API returns JSON
+            "X-API-KEY": "bdudu4@dkndf45d",
+            "Content-Type": "application/json"
+        }
    
     try:
-        response = requests.get(url, headers=headers, params=params)
+        response = requests.post(url, headers=headers, json=payload)
         
         if response.status_code == 200:
             try:
@@ -99,7 +101,7 @@ st.set_page_config(page_title="omniSense Assistant", page_icon="💬")
 st.title("💬 omniSense ChatBot")
 
 # --- API Key Input ---
-user_api_key =f"{secrets['keyvalue']}" #st.text_input(OPENAI_APIKEY, type="password")
+user_api_key = st.text_input(OPENAI_APIKEY, type="password") #f"{secrets['keyvalue']}"
 
 if not user_api_key:
     st.warning("⚠️ Please enter your OpenAI API key to continue.")
@@ -343,7 +345,7 @@ if user_question:
                 # Case 2: An error occurred during query generation or execution.
                 # This provides error details to the user, including the problematic expression.
                 response = f"I'm sorry, I couldn't generate a response for that question right now. " \
-                f"Could you please try asking something else? {e}"
+                f"Could you please try asking something else?"
                 # response = ask_SmartResponse(
                 #     user_question,
                 #     f"I couldn't process that request due to an error. "
@@ -358,7 +360,7 @@ if user_question:
                 raw_response = ask_openai(user_question, context)
                 response = ask_SmartResponse(user_question, raw_response)
             except Exception as e:
-                #response = f"❌ Error generating qualitative response: {e}"
+                #response = f"❌ Error generating qualitative response:"
                 response = f"I'm sorry, I couldn't generate a response for that question right now. " \
                 f"Could you please try asking something else?"
 
