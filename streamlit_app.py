@@ -85,7 +85,7 @@ def run_query(user_query):
             try:
                 data = response.json()  # If API returns JSON
                 df = pd.DataFrame(data)
-                print(df.to_string())
+                
                 #st.success("✅ Data fetched successfully!")
                 return df
             except ValueError:
@@ -319,6 +319,7 @@ if user_question:
                 
                 # --- Run SQL query from expression ---
                 result_df = run_query(python_expr)
+                print(result_df.to_string())
                 if result_df is not None and not result_df.empty:
                    
                     if result_df.shape == (1, 1):
