@@ -85,6 +85,7 @@ def run_query(user_query):
             try:
                 data = response.json()  # If API returns JSON
                 df = pd.DataFrame(data)
+                print(df.to_string())
                 #st.success("✅ Data fetched successfully!")
                 return df
             except ValueError:
