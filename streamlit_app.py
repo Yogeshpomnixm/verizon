@@ -6,11 +6,13 @@ import io # Added for df.info() debugging
 import pyodbc
 import requests
 # --- DATABASE CONFIG ---
-server = 'bizlyzer.database.windows.net,1433;'  # e.g., 'localhost\\SQLEXPRESS' or '192.168.1.10'
-database = 'BizlyzerBeta;'
-username = 'BizlyzerDBA;'
-password = 'B1zlyz3rDBA;'
-
+server = 'servername'  # e.g., 'localhost\\SQLEXPRESS' or '192.168.1.10'
+database = 'databasename;'
+username = 'username;'
+password = 'password;'
+API_KEY = os.getenv("OMNI_API_KEY")
+secrets = st.secrets["database"]
+OPENAI_APIKEY=f"{secrets['keyvalue']}" #os.getenv("OPENAI_API_KEY")
 # --- DATABASE CONNECTION FUNCTION ---
 def get_connection():
     try:
